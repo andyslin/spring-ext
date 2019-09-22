@@ -1,14 +1,13 @@
-package org.autumn.spring.argsbind.provider;
+package org.autumn.spring.argsbind.test;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class PropertyValuesController {
+public class TestController {
 
     @GetMapping("/test")
-    public PropertyValuesForm test(PropertyValuesForm form) {
-        System.out.println(form);
+    public TestForm test(TestForm form) {
         return form;
     }
 }
