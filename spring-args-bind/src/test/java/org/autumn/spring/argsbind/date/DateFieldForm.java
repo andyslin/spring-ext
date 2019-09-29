@@ -32,4 +32,13 @@ public class DateFieldForm {
     // 上月同一天
     @DateField(offsets = {0, -1})
     private String date4;
+
+    // 单独使用新注解
+    @NewDateField
+    private String newDate;
+
+    // 组合使用两个注解
+    @DateField(name = "newDate")
+    @NewDateField
+    private String newDateFormat;
 }

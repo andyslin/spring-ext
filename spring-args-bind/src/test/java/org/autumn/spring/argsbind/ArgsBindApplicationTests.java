@@ -1,8 +1,5 @@
 package org.autumn.spring.argsbind;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import org.autumn.spring.argsbind.rsa.RSAUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,6 +13,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static org.autumn.spring.argsbind.rsa.RSAUtils.RSA_PAIR;
 
@@ -77,7 +77,11 @@ public class ArgsBindApplicationTests {
 
     @Test
     public void dateField() throws Exception {
-        MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/dateField").param("date2", "20190929")).andReturn();
+        MvcResult result = mvc.perform(
+                MockMvcRequestBuilders.get("/dateField")
+                        .param("date2", "20190929")
+                        .param("newDate", "29/09/2019")
+        ).andReturn();
         MockHttpServletResponse response = result.getResponse();
         Assert.assertEquals(200, response.getStatus());
 
@@ -99,5 +103,9 @@ public class ArgsBindApplicationTests {
         Assert.assertEquals(yesterday, json.getString("date3"));
         // 当前日期的上个月同一天
         Assert.assertEquals(theDayOfLastMonth, json.getString("date4"));
+
+        // 复合注解
+        Assert.assertEquals("2019-09-29", json.getString("newDate"));
+        Assert.assertEquals("2019-09-29", json.getString("newDateField"));
     }
 }

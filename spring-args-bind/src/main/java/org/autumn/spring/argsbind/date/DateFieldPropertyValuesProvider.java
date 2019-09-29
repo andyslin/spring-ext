@@ -1,5 +1,12 @@
 package org.autumn.spring.argsbind.date;
 
+import org.autumn.spring.argsbind.PropertyValuesProvider;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import javax.servlet.ServletRequest;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -10,13 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.servlet.ServletRequest;
-
-import org.autumn.spring.argsbind.PropertyValuesProvider;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 @Component
 public class DateFieldPropertyValuesProvider implements PropertyValuesProvider {
@@ -39,7 +39,8 @@ public class DateFieldPropertyValuesProvider implements PropertyValuesProvider {
                 if (!dateFields.containsKey(cls)) {
                     List<Field> fields = new ArrayList<>();
                     for (Field field : cls.getDeclaredFields()) {
-                        if (null != AnnotationUtils.getAnnotation(field, DateField.class)) {
+                        if (null != AnnotationUtils.getAnnotation(field, DateField.class)
+                                || null != AnnotationUtils.getAnnotation(field, DateFormat.class)) {
                             fields.add(field);
                         }
                     }
@@ -51,15 +52,20 @@ public class DateFieldPropertyValuesProvider implements PropertyValuesProvider {
     }
 
     private void dealDateField(MutablePropertyValues mpvs, ServletRequest request, Field field, Map<String, LocalDate> cached) {
-        DateField annotation = AnnotationUtils.getAnnotation(field, DateField.class);
-        String format = annotation.format();
-        String paramName = annotation.name();
+        DateField dateField = AnnotationUtils.getAnnotation(field, DateField.class);
+        DateFormat dateFormat = AnnotationUtils.getAnnotation(field, DateFormat.class);
+
+        String paramName = null != dateField ? dateField.name() : null;
+        String format = null != dateFormat ? dateFormat.format() : dateField.format();
+        String[] allowFormats = null != dateFormat ? dateFormat.allowFormats() : dateField.allowFormats();
+        int[] offsets = null != dateField ? dateField.offsets() : new int[0];
+
         if (!StringUtils.hasText(paramName)) {
             paramName = field.getName();
         }
-        String parameter = request.getParameter(paramName);
-        int[] offsets = annotation.offsets();
+
         int length = offsets.length;
+        String parameter = request.getParameter(paramName);
 
         // 未传入值，且无偏移量，则不做处理
         if (!StringUtils.hasText(parameter) && length == 0) {
@@ -72,7 +78,7 @@ public class DateFieldPropertyValuesProvider implements PropertyValuesProvider {
         if (property instanceof LocalDate) {
             localDate = (LocalDate) property;
         } else {
-            localDate = getLocalDate(format, annotation.allowFormats(), paramName, parameter);
+            localDate = getLocalDate(format, allowFormats, paramName, parameter);
             cached.put(paramName, localDate);
         }
 
