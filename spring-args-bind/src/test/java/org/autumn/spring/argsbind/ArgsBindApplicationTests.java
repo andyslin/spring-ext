@@ -86,6 +86,7 @@ public class ArgsBindApplicationTests {
         Assert.assertEquals(200, response.getStatus());
 
         JSONObject json = new JSONObject(response.getContentAsString());
+        System.out.println(json);
         // 未设置偏移，也未传入参数，为null
         Assert.assertEquals("null", json.getString("date1"));
         // 传入格式为yyyyMMdd，但接受格式为yyyy-MM-dd
@@ -106,6 +107,6 @@ public class ArgsBindApplicationTests {
 
         // 复合注解
         Assert.assertEquals("2019-09-29", json.getString("newDate"));
-        Assert.assertEquals("2019-09-29", json.getString("newDateField"));
+        Assert.assertEquals("2019-09-29", json.getString("newDateFormat"));
     }
 }
