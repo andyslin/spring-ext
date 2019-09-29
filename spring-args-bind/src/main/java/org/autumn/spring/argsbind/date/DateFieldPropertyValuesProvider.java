@@ -59,12 +59,14 @@ public class DateFieldPropertyValuesProvider implements PropertyValuesProvider {
         }
         String parameter = request.getParameter(paramName);
         int[] offsets = annotation.offsets();
+        int length = offsets.length;
 
         // 未传入值，且无偏移量，则不做处理
-        if (!StringUtils.hasText(parameter) && offsets.length == 0) {
+        if (!StringUtils.hasText(parameter) && length == 0) {
             return;
         }
 
+        // 获取日期对象
         LocalDate localDate;
         Object property = cached.get(paramName);//尝试从本地缓存中获取已解析过的日期对象
         if (property instanceof LocalDate) {
@@ -74,18 +76,11 @@ public class DateFieldPropertyValuesProvider implements PropertyValuesProvider {
             cached.put(paramName, localDate);
         }
 
-        int length = offsets.length;
-        if (length == 0) {
-            // 不处理
-        } else if (length == 1) {
-            localDate = localDate.plusDays(offsets[0]);
-        } else {
-            // 日 月 周 年
-            localDate = localDate.plusDays(offsets[0])
-                    .plusMonths(offsets[1])
-                    .plusWeeks(length >= 3 ? offsets[2] : 0)
-                    .plusYears(length >= 4 ? offsets[3] : 0);
-        }
+        //计算偏移量 日 月 周 年
+        localDate = localDate.plusDays(length >= 1 ? offsets[0] : 0)
+                .plusMonths(length >= 2 ? offsets[1] : 0)
+                .plusWeeks(length >= 3 ? offsets[2] : 0)
+                .plusYears(length >= 4 ? offsets[3] : 0);
         mpvs.add(field.getName(), localDate.format(DateTimeFormatter.ofPattern(format)));
     }
 
