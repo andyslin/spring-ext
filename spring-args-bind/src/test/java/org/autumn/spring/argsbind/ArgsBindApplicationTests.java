@@ -81,15 +81,23 @@ public class ArgsBindApplicationTests {
         MockHttpServletResponse response = result.getResponse();
         Assert.assertEquals(200, response.getStatus());
 
+        JSONObject json = new JSONObject(response.getContentAsString());
+        // 未设置偏移，也未传入参数，为null
+        Assert.assertEquals("null", json.getString("date1"));
+        // 传入格式为yyyyMMdd，但接受格式为yyyy-MM-dd
+        Assert.assertEquals("2019-09-29", json.getString("date2"));
+        // 传入日期的前一天
+        Assert.assertEquals("20190928", json.getString("prevDate"));
+        // 传入日期的上个月同一天
+        Assert.assertEquals("20190829", json.getString("sameDateOfPrevMonth"));
+
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");//默认格式
         LocalDateTime dateTime = LocalDateTime.now();
         String yesterday = dateTime.minusDays(1).format(dateTimeFormatter);
         String theDayOfLastMonth = dateTime.minusMonths(1).format(dateTimeFormatter);
-
-        JSONObject json = new JSONObject(response.getContentAsString());
-        Assert.assertEquals("null", json.getString("date1"));
-        Assert.assertEquals("2019-09-29", json.getString("date2"));
+        // 当前日期前一天
         Assert.assertEquals(yesterday, json.getString("date3"));
+        // 当前日期的上个月同一天
         Assert.assertEquals(theDayOfLastMonth, json.getString("date4"));
     }
 }

@@ -17,6 +17,14 @@ public class DateFieldForm {
     @DateField(format = "yyyy-MM-dd", allowFormats = {"yyyyMMdd", "yyyy/MM/dd"})
     private String date2;
 
+    // 传入参数的前一天
+    @DateField(name = "date2", offsets = -1)
+    private String prevDate;
+
+    // 传入参数的上月同一天
+    @DateField(name = "date2", offsets = {0, -1})
+    private String sameDateOfPrevMonth;
+
     // 昨天
     @DateField(offsets = -1)
     private String date3;
