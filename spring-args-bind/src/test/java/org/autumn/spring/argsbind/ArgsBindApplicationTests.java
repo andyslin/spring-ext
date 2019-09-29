@@ -1,5 +1,8 @@
 package org.autumn.spring.argsbind;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.autumn.spring.argsbind.rsa.RSAUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -70,5 +73,23 @@ public class ArgsBindApplicationTests {
 
         JSONObject json = new JSONObject(response.getContentAsString());
         Assert.assertEquals(src, json.getString("rsa"));
+    }
+
+    @Test
+    public void dateField() throws Exception {
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/dateField").param("date2", "20190929")).andReturn();
+        MockHttpServletResponse response = result.getResponse();
+        Assert.assertEquals(200, response.getStatus());
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");//默认格式
+        LocalDateTime dateTime = LocalDateTime.now();
+        String yesterday = dateTime.minusDays(1).format(dateTimeFormatter);
+        String theDayOfLastMonth = dateTime.minusMonths(1).format(dateTimeFormatter);
+
+        JSONObject json = new JSONObject(response.getContentAsString());
+        Assert.assertEquals("null", json.getString("date1"));
+        Assert.assertEquals("2019-09-29", json.getString("date2"));
+        Assert.assertEquals(yesterday, json.getString("date3"));
+        Assert.assertEquals(theDayOfLastMonth, json.getString("date4"));
     }
 }
